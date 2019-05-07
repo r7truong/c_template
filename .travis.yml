@@ -1,6 +1,10 @@
 language: c
 compiler: gcc
 
+install:
+- sudo apt-get install -qq cppcheck
+
 script:
 - g++ c_hello_world.c -o travis_gcc_c
 - ./travis_gcc_c
+- cppcheck --quiet --error-exitcode=1 .
