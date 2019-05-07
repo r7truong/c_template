@@ -1,0 +1,6 @@
+language: c
+compiler: gcc
+
+script:
+- g++ c_hello_world.c -o travis_gcc_c
+- ./travis_gcc_c
