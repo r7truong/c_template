@@ -1,22 +1,42 @@
 language: c
-compiler: gcc
+compiler:
+  # Build
+  - gcc
+  - clang
+# newer distro (Trusty Tahr), instead of the one used by default (Precise Pangolin)
 dist: trusty
 
 before_install:
   # C++17
+  # A PPA is added for (even) newer packages
   - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
   - sudo apt-get update -qq
 
 install: 
   # C++17
+  # g++ is redirected to use g++-6
   - sudo apt-get install -qq g++-6
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 90
-  # cppcheck
   - sudo apt-get install -qq cppcheck
+  - pip install cpplint
+  - sudo apt-get install clang-tidy
 
-script: 
-  # Build and run this project
-  - g++ main.cpp -std=c++17 -o travis_gcc_c99_cppcheck
-  - ./travis_gcc_c99_cppcheck
-  # cppcheck
-  - cppcheck --quiet --error-exitcode=1 .
+jobs:
+  include:
+    - stage: "Validation"
+      name: "cpplint"
+      script:
+        - cpplint *
+      name: "clang-tidy"
+      script:
+        - clang-tidy *
+
+    - stage: "Static Analysis"
+      name: "clang-analyzer"
+      script:
+        - scan-build clang
+      name: "cppcheck"
+        # Build and run this project
+        - g++ main.cpp -std=c++17 -o travis_gcc_cpp17_cppcheck
+        - ./travis_gcc_cpp17_cppcheck
+        - cppcheck --quiet --error-exitcode=1 .
